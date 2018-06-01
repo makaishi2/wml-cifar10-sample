@@ -6,7 +6,7 @@
 ![](readme_images/cifar10-web1.png)  
 
 ## 前提
-Watson Studio上で、CIFAR-10認識のための深層学習モデルの構築、学習、保存、テストまでできていることが前提です。  
+Watson Studio上で、CIFAR-10認識のための深層学習モデルの構築、学習、保存、WEBサービス化、テストまでできていることが前提です。  
 詳細手順に関しては、[Watson Studioで深層学習。KerasサンプルアプリをGPU+TensorBoardで動かす](https://qiita.com/makaishi2/items/1fc28f5039798a883aef)などを参照して下さい。
 
 ## 事前準備
