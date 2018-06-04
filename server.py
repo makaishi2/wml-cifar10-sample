@@ -41,7 +41,7 @@ def allowed_file(filename):
 @app.route('/')
 def top():
     name = "Top"
-    return render_template('wml-sample.html', title='WML Test', name=name)
+    return render_template('wml-sample.html', title='CIFAR10 Sample Web', name=name)
 
 # 「予測」ボタンが押された時の処理
 @app.route('/predict', methods=['POST'])
