@@ -60,10 +60,9 @@ def predict():
         print( 'shape1: ', im.shape)
         im_data = np.uint8(im)
         im_data2 = im_data[:,:,:3]
-        im_data3 = im_data2.astype("float32")/255
-        print( 'shape2: ', im_data3.shape)
-        im_data4 = im_data3.tolist()
-        print(im_data4)
+        print( 'shape2: ', im_data2.shape)
+        im_data3 = im_data2.tolist()
+        print(im_data3)
 
     # トークン取得
     auth = '{username}:{password}'.format(username=wml_credentials['username'], password=wml_credentials['password'])
@@ -76,7 +75,7 @@ def predict():
     
     # API呼出し用ヘッダ
     header = {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + mltoken}
-    payload_scoring = {"values": [im_data4]}
+    payload_scoring = {"values": [im_data3]}
 
     # API呼出し
     response_scoring = requests.post(scoring_url, json=payload_scoring, headers=header)
