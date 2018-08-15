@@ -26,7 +26,7 @@ GITコマンドを使わない場合は、[Github](https://github.com/makaishi2/
 ```sh
 $ cd (適当なサブディレクトリ)
 $ git clone https://github.com/makaishi2/wml-cifar10-sample.git
-$ cd cifar10-sample
+$ cd wml-cifar10-sample
 ```
 
 ## CFコマンドでログイン
