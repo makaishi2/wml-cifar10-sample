@@ -11,7 +11,6 @@ Watson Studio上で、CIFAR-10認識のための深層学習モデルの構築�
 
 ## ibmcloudコマンドの導入
 導入にはibmcloudコマンドを利用します。
-導入にはibmcloudコマンドを利用します。  
 ibmcloudコマンドが未導入の場合は、以下のリンク先からダウンロード・導入を行って下さい。  
 [IBM Cloudコマンドラインツール](https://console.bluemix.net/docs/cli/reference/ibmcloud/download_cli.html#install_use)  
 注意: ibmcloudコマンドのバージョンは最新として下さい。 
