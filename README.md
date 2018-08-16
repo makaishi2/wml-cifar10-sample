@@ -9,18 +9,20 @@
 Watson Studio上で、CIFAR-10認識のための深層学習モデルの構築、学習、保存、WEBサービス化、テストまでできていることが前提です。  
 詳細手順に関しては、[Watson Studioで深層学習。KerasサンプルアプリをGPU+TensorBoardで動かす](https://qiita.com/makaishi2/items/1fc28f5039798a883aef)などを参照して下さい。
 
-## CFコマンドの導入
-CFコマンドがまだ使えない場合は、導入を行います。
-[Cloud Foundryコマンドラインツール][cloud_foundry]  
-注意: Cloud Foundaryのバージョンは最新として下さい。 
+## ibmcloudコマンドの導入
+導入にはibmcloudコマンドを利用します。
+導入にはibmcloudコマンドを利用します。  
+ibmcloudコマンドが未導入の場合は、以下のリンク先からダウンロード・導入を行って下さい。  
+[IBM Cloudコマンドラインツール](https://console.bluemix.net/docs/cli/reference/ibmcloud/download_cli.html#install_use)  
+注意: ibmcloudコマンドのバージョンは最新として下さい。 
 
 ## ソースのダウンロード
 Githubからアプリケーションのソースをダウンロードします。  
 カレントディレクトリのサブディレクトリにソースはダウンロードされるので、あらかじめ適当なサブディレクトリを作り、そこにcdしてから下記のコマンドを実行します。  
-GITコマンドを使わない場合は、[Github](https://github.com/makaishi2/wml-cifar10-sample)にブラウザからアクセスして、zipファイルをダウンロード後、解凍します。  
+GITコマンドを使わない場合は、[Github](https://github.com/makaishi2/wml-cifar10-sample) にブラウザからアクセスして、zipファイルをダウンロード後、解凍します。  
 ダウンロード後、できたサブディレクトリにcdします。  
 以下はgitコマンドを使う場合の例です。
- 
+
 
 ```sh
 $ cd (適当なサブディレクトリ)
@@ -28,31 +30,39 @@ $ git clone https://github.com/makaishi2/wml-cifar10-sample.git
 $ cd wml-cifar10-sample
 ```
 
-## CFコマンドでログイン
-CFコマンドでIBM Cloud環境にログインします。  
+## ibmcloudコマンドでログイン
+IBM Cloud環境にログインします。  
 ログイン名、パスワードはIBM Cloudアカウント登録で登録したものを利用します。  
-ログインに成功すると、次のような画面となります。  
+ログイン後には、``ibmcloud target --cf``コマンドを実行し、ターゲットの組織とスペースを確定して下さい。
 
 ```
-$ cf api https://api.ng.bluemix.net
-$ cf login
+$ ibmcloud login
+$ ibmcloud target --cf
 ```
 
-![](readme_images/cf-login.png)  
 
 ## Watson MLサービス名称の確認
-次のコマンドを実行し、Watson MLのサービス名称を確認します。
+次のコマンドを実行し、Watson MLのサービス名称(サービス名がpm-20のもの)を確認します。
 
 ```
-$ cf s | grep pm-20
+$ ibmcloud service list
 ```
 
-結果がまったく返ってこない場合は、Watson Machine LearningがIAMサービスになっていると考えられます。
-その場合は、以下のリンク先の手順に従い、エイリアス定義を行って下さい。
+もし、Watson MLのサービス名がない場合は、Watson Machine LearningがIAMサービスになっていると考えられます。
+その場合は、以下の手順でエイリアス定義を行って下さい。
 
-[IBM Cloud IAM対応のためのtips](https://qiita.com/makaishi2/items/ab2290e471fbff245b6a)
+```
+# Machine Learningのインスタンス名確認
+$ ibmcloud resource service-instances
 
-以下では、Watson MLサービス名を``<pm-20-name>``であるとします。
+# エイリアス定義
+$ ibmcloud resource service-alias-create machine-learning-1 --instance-name "Machine Learning-xx"
+
+# エイリアス"machine-learning-1" が登録されたことの確認
+$ ibmcloud service list
+```
+
+以下では、Watson MLサービス名を``machine-learning-1``であるとします。
 
 ## アプリケーションのデプロイ
 
@@ -61,7 +71,7 @@ $ cf s | grep pm-20
 (例) **wml-cifar10-aka**
 
 ```
-$ cf push <service_name>
+$ ibmcloud app push <APP_NAME>
 ```
 
 デプロイには数分かかります。
@@ -70,13 +80,20 @@ $ cf push <service_name>
 
 次のcfコマンドでサービスのバインドとエンドポイントURLの設定を行います。
 scoring_urlは、Watson StudioのWebサービス管理画面->Implementationタブの**Scoreing End-point**の欄に記載があるので、コピペして利用します。
-コマンドのうちrgコマンド(アプリケーションの再構築)に数分の時間がかかります。
+コマンドのうちrestageコマンド(アプリケーションの再構築)に数分の時間がかかります。
 
 ```
-$ cf ns <service_name> <pm20-name>
-$ cf se <service_name> SCORING_URL <scoring_url>
-$ cf rg <service_name>
-$ cf a
+# Machine Learning サービスのバインド
+$ ibmcloud service bind <APP_NAME> machine-learning-1
+
+# SCORING_URLの設定
+$ ibmcloud app env-set <APP_NAME> SCORING_URL <scoring_url>
+
+# アプリケーションの再構成 (設定変更の有効化)
+$ ibmcloud app restage <APP_NAME>
+
+# アプリケーションのURLを確認
+$ ibmcloud service list
 ```
 
 ## アプリケーションのURLと起動
@@ -88,14 +105,9 @@ $ cf a
 https://<service_name>.mybluemix.net/
 ```
 
-## テスト
-テスト用のサンプルイメージをsample_imagesにいれておきました。
-アプリのテスト時にお使い下さい。
-なお、機械学習モデルの解像度に合わせるため、アップロードしたイメージは32x32のサイズに縮小されます。
-
 ## アプリケーションを修正する場合
 
-アプリケーションを修正したい場合は、ローカルのソースを修正し、再度 ``cf push <service_name>`` コマンドを実行すると、IBM Cloud上のアプリケーションが更新されます。  
+アプリケーションを修正したい場合は、ローカルのソースを修正し、再度 ``ibmcloud app push <service_name>`` コマンドを実行すると、IBM Cloud上のアプリケーションが更新されます。  
 
 ## ローカルで起動する場合
 
@@ -113,9 +125,12 @@ $ cp .env.example .env
 ```
 
 ```sh
-WML_SERVICE_CREDENTIALS_URL=xxxxx
-WML_SERVICE_CREDENTIALS_USERNAME=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-WML_SERVICE_CREDENTIALS_PASSWORD=xxxxxxxxxxxx
+WML_URL="xxxxxx"
+WML_ACCESS_KEY="xxxxxx"
+WML_USERNAME="xxxxxx"
+WML_PASSWORD="xxxxxx"
+WML_INSTANCE_ID="xxxxxx"
+SCORING_URL="xxxxxx"
 ```
 
 * Pythonアプリケーションの導入、実行  
@@ -124,8 +139,4 @@ WML_SERVICE_CREDENTIALS_PASSWORD=xxxxxxxxxxxx
 ```sh
 $ python server.py
 ```
-
-[cloud_foundry]: https://github.com/cloudfoundry/cli#downloads
-[git]: https://git-scm.com/downloads
-[sign_up]: https://bluemix.net/registration
  
