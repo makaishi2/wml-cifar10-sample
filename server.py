@@ -80,6 +80,7 @@ def predict():
     # API呼出し
     response_scoring = requests.post(scoring_url, json=payload_scoring, headers=header)
     res = json.loads(response_scoring.text)
+    print(json.dumps(res, indent=2))
     res_list = res['values'][0][2]
     res_list2 = [round(v, 3) for v in res_list]
     res_class = res['values'][0][1]
